@@ -6,10 +6,9 @@
              xmlns:local="clr-namespace:Szakdolgozat"
              mc:Ignorable="d" 
              d:DesignHeight="500" d:DesignWidth="500">
-    <Viewbox>
-        <Border Grid.Column="0" Grid.Row="1"
-                        BorderThickness="10,10,10,10" BorderBrush="#AA937C"
-                        CornerRadius="5" Background="#776e65">
+    <Viewbox Stretch="Uniform">
+        <Border BorderThickness="10,10,10,10" BorderBrush="#AA937C"
+                        CornerRadius="5" Background="#776e65"> 
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="125"></RowDefinition>
@@ -56,8 +55,6 @@
                                           Canvas.Left="375" Canvas.Top="250" />
                     <local:BackgroundCell RenderTransformOrigin="0.5,0.5"
                                           Canvas.Left="375" Canvas.Top="375" />
-
-
                 </Canvas>
             </Grid>
         </Border>

@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace Szakdolgozat.Model
 {
-    enum Direction
+    public enum Direction
     {
         UP, DOWN, LEFT, RIGHT, UNDEFINED
     }
 
-    enum GameState
+    public enum GameState
     {
         WIN, GAME, LOSE
     }
@@ -73,8 +73,7 @@ namespace Szakdolgozat.Model
             return false;
         }
 
-        public
-            GameState CheckGameState()
+        public GameState CheckGameState()
         {
             for(int i = 0; i < SIZE; i++)
             {
@@ -151,18 +150,10 @@ namespace Szakdolgozat.Model
             for (int i = 0; i < gl.SIZE; i++)
             {
                 int j = 0;
-                //minden x-nek minden y-ján végig megyünk
                 while (j < SIZE)
                 {
-                    //megnézzük, ha a mozgás irányába transzformáljuk a koordinátákat
-                    //akkor vajon nem nulla-e az érték
-                    //transzformáljuk = 
-                    //(elforgatjuk az alap algoritmust koordinátáit a mozgás
-                    //iránya szerinti koordinátákra)
-                    //
                     if (GameTable[GetRightCoordx(i, j), GetRightCoordy(i, j)].Value != 0)
                     {
-                        //ha nem nulla akkor a mezóőt mergelni vagy csúsztatni kell
                         LookAndMergeOrSlide(i, j);
                     }
                     j++;
@@ -172,11 +163,13 @@ namespace Szakdolgozat.Model
 
         public int GetRightCoordx(int x, int y)
         {
-            //visszaadjuk a mozgás irányának megfelelő "x" koordinátákat
-            //a 2D tömb megcímzéséhez
-            if (MovingDir == Direction.UP || MovingDir == Direction.DOWN)
+            if (MovingDir == Direction.UP)
             {
                 return x;
+            }
+            if(MovingDir == Direction.DOWN)
+            {
+                return (SIZE - 1) - x;
             }
             if (MovingDir == Direction.RIGHT)
             {
@@ -190,8 +183,6 @@ namespace Szakdolgozat.Model
 
         public int GetRightCoordy(int x, int y)
         {
-            //visszaadjuk a mozgás irányának megfelelő "y" koordinátákat
-            //a 2D tömb megcímzéséhez
             if (MovingDir == Direction.UP)
             {
                 return y;
@@ -202,80 +193,48 @@ namespace Szakdolgozat.Model
             }
             if (MovingDir == Direction.RIGHT)
             {
-                return (SIZE - 1) - x;
+                return x;
             }
             else //MovingDir == Direction.LEFT
             {
-                return x;
+                return (SIZE - 1) - x;
             }
         }
 
         private void LookAndMergeOrSlide(int x, int y)
         {
-            //a bejövő y-nál eggyel kisebb értékű
-            //mezőtől kezdjük a vizsgálatot
             int j = y - 1;
-
-            //ha kisebb mint nulla akkor y a falnál volt,
-            //és minden marad úgy ahogy volt
+            
             if (j >= 0)
             {
-                //egyébként elkezdjük a vissazfelé vizsgálni a cellákat
                 while (j >= 0)
-                {
-                    //ha nulla akkor megvizsgáljuk, hogy mi van a nullában
-                    //ha egyenlő értékű még nem mergelt cella akkor break
-                    //egyébként ha nulla értékű akkor break
-                    //ha pedig se nem nulla se nem egyenlő akkor j++ mert j-re biztos nem rakhatjuk                                                 
-                    if (j == 0)
+                {                                            
+                    
+                    if (GameTable[GetRightCoordx(x, y), GetRightCoordy(x, y)].Value == GameTable[GetRightCoordx(x, j), GetRightCoordy(x, j)].Value
+                            && !GameTable[GetRightCoordx(x, j), GetRightCoordy(x, j)].Merged)
                     {
-                        if (GameTable[GetRightCoordx(x, y), GetRightCoordy(x, y)].Value == GameTable[GetRightCoordx(x, j), GetRightCoordy(x, j)].Value
-                                && !GameTable[GetRightCoordx(x, j), GetRightCoordy(x, j)].Merged)
+                        break;
+                    }
+                    else
+                    {
+                        if (GameTable[GetRightCoordx(x, j), GetRightCoordy(x, j)].Value == 0)
                         {
-                            break;
-                        }
-                        else
-                        {
-                            if (GameTable[GetRightCoordx(x, j), GetRightCoordy(x, j)].Value == 0)
+                            if (j == 0)
                             {
                                 break;
                             }
                             else
-                            {
-                                j++;
-                                break;
-                            }
-                        }
-                    }
-                    //ha nem nulla akkor a logiak szintén hasonló annyi különbséggel, hogy
-                    //a cella értéka nulla, akkor még mehetünk mert ez azt jelneti, hogy csúszhatunk arra a mezőre
-                    //egyénként ha egyenlő és nem mergelt akkor break;
-                    //ha se nem nulla se nem egyenlő akkor mint fent itt is j++
-                    else
-                    {
-                        if (GameTable[GetRightCoordx(x, y), GetRightCoordy(x, y)].Value == GameTable[GetRightCoordx(x, j), GetRightCoordy(x, j)].Value
-                            && !GameTable[GetRightCoordx(x, j), GetRightCoordy(x, j)].Merged)
-                        {
-                            break;
-                        }
-                        else
-                        {
-                            if (GameTable[GetRightCoordx(x, j), GetRightCoordy(x, j)].Value == 0)
                             {
                                 j--;
                             }
-                            else
-                            {
-                                j++;
-                                break;
-                            }
+                        }
+                        else
+                        {
+                            j++;
+                            break;
                         }
                     }
                 }
-                //ha a j++ hatására j != y akkor azt jelenti, hogy változott a poziciónk
-                //kiszámoljuk a koordinátákat
-                //ha azonos értékű cellára kerültünk akkor merge
-                //egyébként csak átmásoljuk a tartalmát
                 if (j != y)
                 {
                     int xjnew = GetRightCoordx(x, j);
@@ -304,13 +263,6 @@ namespace Szakdolgozat.Model
                     int ynew = GetRightCoordy(x, y);
                     GameTable[xynew, ynew].From.Add(new Coordinates(xynew, ynew));
                 }
-                ////egyébként onnan jött ahol van
-                //else
-                //{
-                //    int xynew = GetRightCoordx(x, y);
-                //    int ynew = GetRightCoordy(x, y);
-                //    GameTable[xynew, ynew].From.Add(new Coordinates(xynew, ynew));
-                //}
             }
         }
 

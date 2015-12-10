@@ -35,6 +35,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Kinect, Version=1.8.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -77,6 +78,12 @@
     <Compile Include="GameGrid.xaml.cs">
       <DependentUpon>GameGrid.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Kinect\ToolBox\ContextPoint.cs" />
+    <Compile Include="Kinect\ToolBox\ContextTracker.cs" />
+    <Compile Include="Kinect\ToolBox\GesturePoint.cs" />
+    <Compile Include="Kinect\ToolBox\GestureDetector.cs" />
+    <Compile Include="Kinect\ToolBox\SwipeGestureDetector.cs" />
+    <Compile Include="Kinect\ToolBox\Vector.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -91,7 +98,11 @@
     <Compile Include="GameCell.xaml.cs">
       <DependentUpon>GameCell.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Kinect\KinectColorStreamManager.cs" />
     <Compile Include="Model\GameLogic.cs" />
+    <Compile Include="Kinect\KinectNotifier.cs" />
+    <Compile Include="Kinect\KinectSkeletonDisplayManager.cs" />
+    <Compile Include="Kinect\ToolBox\Tools.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

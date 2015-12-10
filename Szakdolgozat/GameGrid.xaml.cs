@@ -27,7 +27,7 @@ namespace Szakdolgozat
         private static GameLogic gl;
         private static GameCell[,] GameGridCells { get; set; }
 
-        bool pressed = false;
+        private bool _pressed = false;
 
         public GameGrid()
         {
@@ -59,27 +59,36 @@ namespace Szakdolgozat
 
         public void UserControl_KeyDown(object sender, KeyEventArgs e)
         {
+            Direction dir = Direction.UNDEFINED;
+            base.OnKeyDown(e);
+            if (e.Key == Key.Up)
+                dir = Direction.UP;
 
-            if (!pressed)
+            if (e.Key == Key.Down)
+                dir = Direction.DOWN;
+
+            if (e.Key == Key.Left)
+                dir = Direction.LEFT;
+
+            if (e.Key == Key.Right)
+                dir = Direction.RIGHT;
+
+
+            SetMovingDirAndControl(dir);
+        }
+
+        public void SetMovingDirAndControl(Direction dir)
+        {
+            GameLogic.GetInstance().MovingDir = dir;
+
+            if (!_pressed)
             {
-                pressed = true;
-                base.OnKeyDown(e);
-                if (e.Key == Key.Up)
-                    GameLogic.GetInstance().MovingDir = Direction.UP;
-
-                if (e.Key == Key.Down)
-                    GameLogic.GetInstance().MovingDir = Direction.DOWN;
-
-                if (e.Key == Key.Left)
-                    GameLogic.GetInstance().MovingDir = Direction.LEFT;
-
-                if (e.Key == Key.Right)
-                    GameLogic.GetInstance().MovingDir = Direction.RIGHT;
+                _pressed = true;
 
                 if (gl.CanMoveInDir())
                     ControlAll();
                 else
-                    pressed = false;
+                    _pressed = false;
             }
         }
 
@@ -92,8 +101,6 @@ namespace Szakdolgozat
             gl.ClearFrom();
 
             CreateRandomNew();
-
-            //gl.CheckGameState();
         }
 
         public void AnimateSlideAndMerge()
@@ -103,18 +110,17 @@ namespace Szakdolgozat
                 for (int j = 0; j < gl.SIZE; j++)
                 {
                     Coordinates t = new Coordinates(gl.GetRightCoordx(i, j), gl.GetRightCoordy(i, j));
-                    //ha olyan mezőbe ütközünk amiben nem 0 van és van honnan jött
-                    //akkor végigmegyünk a honnan mezőkön és mindegyiket meganimáljuk
-                    //és átadjuk a first paramétert ami azért kell, hogy abban az esetben
-                    //be tudjuk állítani a to mezőt a végén
-                    if (gl.GetValueAt(t.X, t.Y) != 0 && gl.GetFromAt(t.X, t.Y).Count == 1)
+                    if (gl.GetValueAt(t.X, t.Y) != 0)
                     {
-                        Animation(gl.GetFromAt(t.X, t.Y).ElementAt(0), t, true);
-                    }
-                    else if (gl.GetValueAt(t.X, t.Y) != 0 && gl.GetFromAt(t.X, t.Y).Count == 2)
-                    {
-                        Animation(gl.GetFromAt(t.X, t.Y).ElementAt(0), t, false);
-                        Animation(gl.GetFromAt(t.X, t.Y).ElementAt(1), t, true);
+                        if (gl.GetFromAt(t.X, t.Y).Count == 1)
+                        {
+                            Animation(gl.GetFromAt(t.X, t.Y).ElementAt(0), t, true);
+                        }
+                        else if (gl.GetFromAt(t.X, t.Y).Count == 2)
+                        {
+                            Animation(gl.GetFromAt(t.X, t.Y).ElementAt(0), t, false);
+                            Animation(gl.GetFromAt(t.X, t.Y).ElementAt(1), t, true);
+                        }
                     }
                 }
             }
@@ -125,26 +131,22 @@ namespace Szakdolgozat
             Storyboard sb = new Storyboard();
             DoubleAnimation slide = new DoubleAnimation();
 
-            // Beállítjuk az animáció paramétereit
+            slide.Duration = new Duration(TimeSpan.FromMilliseconds(150));
             if (gl.MovingDir == Direction.UP || gl.MovingDir == Direction.DOWN)
             {
                 slide.To = to.Y * 125;
                 slide.From = from.Y * 125;
+                Storyboard.SetTargetProperty(slide, new PropertyPath("RenderTransform.(TranslateTransform.Y)"));
             }
             else
             {
                 slide.To = to.X * 125;
                 slide.From = from.X * 125;
-            }
-            slide.Duration = new Duration(TimeSpan.FromMilliseconds(150));
-            if (gl.MovingDir == Direction.UP || gl.MovingDir == Direction.DOWN)
-                Storyboard.SetTargetProperty(slide, new PropertyPath("RenderTransform.(TranslateTransform.Y)"));
-            else
                 Storyboard.SetTargetProperty(slide, new PropertyPath("RenderTransform.(TranslateTransform.X)"));
+            }
 
             Storyboard.SetTarget(slide, GameGridCells[from.X, from.Y]);
-
-            // Elindítjuk az animációkat és átadjuk a paramétereket
+            
             sb.Completed += (sender, e) => AnimationEnds(from, to, last);
 
             sb.Children.Add(slide);
@@ -180,7 +182,6 @@ namespace Szakdolgozat
 
         public void CreateRandomNew()
         {
-            //megvárjuk amígy az összes animációs esemény lezajlik
             BackgroundWorker barInvoker = new BackgroundWorker();
             barInvoker.DoWork += delegate
             {
@@ -188,8 +189,7 @@ namespace Szakdolgozat
             };
 
             barInvoker.RunWorkerAsync();
-
-            //majd a várás után generálunk egy új kezdőértéket
+            
             barInvoker.RunWorkerCompleted += delegate
             {
                 gl.GenerateRandomNew();
@@ -204,7 +204,7 @@ namespace Szakdolgozat
                         }
                     }
                 }
-                pressed = false;
+                _pressed = false;
             };
         }
     }
